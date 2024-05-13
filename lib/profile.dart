@@ -35,39 +35,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
         appBar: const BaseAppBar(title: 'Profile', canPop: false),
         body: _userData != null
-            ? Padding(
-                padding: EdgeInsets.symmetric(horizontal: Sizes.size16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: Sizes.size20),
-                      child: Text(_userData!['username']),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: Sizes.size53,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context)
-                            .pushReplacement(MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        )),
-                        style: ButtonStyle(
-                            backgroundColor:
-                                const MaterialStatePropertyAll(Colors.red),
-                            foregroundColor:
-                                const MaterialStatePropertyAll(Colors.white),
-                            shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(Sizes.size8)))),
-                        child: const Text(
-                          'Logout',
+            ? Center(
+                child: Padding(
+                  padding: EdgeInsets.all(Sizes.size16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: Sizes.size40),
+                      CircleAvatar(
+                        radius: Sizes.size40,
+                        backgroundImage: NetworkImage(
+                            'https://www.gravatar.com/avatar/${_userData!['email']}?d=identicon'),
+                      ),
+                      SizedBox(height: Sizes.size20),
+                      Text(
+                        _userData!['username'],
+                        style: TextStyle(
+                          fontSize: Sizes.size20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: Sizes.size10),
+                      Text(
+                        'Account Number: ${_userData!['account_no']}',
+                        style: TextStyle(
+                          fontSize: Sizes.size16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: Sizes.size10),
+                      Text(
+                        'Phone Number: ${_userData!['phone']}',
+                        style: TextStyle(
+                          fontSize: Sizes.size16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: Sizes.size10),
+                      Text(
+                        'Email Id: ${_userData!['email']}',
+                        style: TextStyle(
+                          fontSize: Sizes.size16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: Sizes.size10),
+                      Text(
+                        'Your Balance: ${_userData!['total_balance']}',
+                        style: TextStyle(
+                          fontSize: Sizes.size16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: Sizes.size40),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(vertical: Sizes.size12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Sizes.size8),
+                          ),
+                        ),
+                        child: Text('Logout'),
+                      ),
+                    ],
+                  ),
                 ),
               )
             : Center(

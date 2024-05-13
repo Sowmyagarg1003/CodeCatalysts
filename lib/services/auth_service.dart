@@ -138,13 +138,32 @@ class AuthService {
     num senderBalance = senderSnapshot.data()!['total_balance'];
     num receiverBalance = receiverSnapshot.data()!['total_balance'];
 
-    senderBalance -= num.parse(amount);
-    receiverBalance += num.parse(amount);
+    // Convert amount to a numeric value
+    num transferAmount = num.parse(amount);
 
-    await sender.update({"total_balance": senderBalance});
-    await receiver.update({"total_balance": receiverBalance});
+    // Check if the sender has enough balance to make the transfer
+    if (senderBalance >= transferAmount) {
+      // Deduct the amount from the sender's balance
+      senderBalance -= transferAmount;
 
-    print("Balance updated");
+      // Add the amount to the receiver's balance
+      receiverBalance += transferAmount;
+
+      // Ensure that the sender's balance does not become negative
+      if (senderBalance >= 0) {
+        // Update the balances in the database
+        await sender.update({"total_balance": senderBalance});
+        await receiver.update({"total_balance": receiverBalance});
+
+        print("Balance updated");
+      } else {
+        // Log an error message if the sender's balance becomes negative
+        print("Error: Sender's balance cannot be negative");
+      }
+    } else {
+      // Log an error message if the sender does not have enough balance
+      print("Error: Insufficient balance");
+    }
   }
 
   Future<void> addToQuickTransfer(String userId) async {

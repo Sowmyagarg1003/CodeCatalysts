@@ -372,7 +372,19 @@ class Cards extends StatelessWidget {
                     alignment: Alignment.topLeft,
                     child: Text(
                       // '\$ 1,000.00',
-                      "\$ ${cardData?[index]['target'].toString()}",
+                      "Target: \$ ${cardData?[index]['target'].toString()}",
+                      style: TextStyle(
+                          color: AppColors.baseColor, fontSize: Sizes.size16),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: Sizes.size12),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      // '\$ 1,000.00',
+                      "Balance: \$ ${cardData?[index]['balance'].toString()}",
                       style: TextStyle(
                           color: AppColors.baseColor, fontSize: Sizes.size16),
                     ),

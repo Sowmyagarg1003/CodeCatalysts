@@ -21,7 +21,7 @@ class _RegisterPhoneState extends State<RegisterPhone> {
   bool _isValid = false;
   bool _isPhoneAvailable = false;
 
-  String dropdownValue = "+90";
+  String dropdownValue = "+91";
   Future<void> _validatePhone(String phone) async {
     bool isValid = phone.length == 10;
     _isPhoneAvailable = await AuthService().checkPhone(phone);
