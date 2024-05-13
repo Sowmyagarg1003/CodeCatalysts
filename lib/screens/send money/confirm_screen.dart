@@ -1,19 +1,25 @@
+// Import necessary packages
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:transactions_app/utils/constants.dart';
 import 'package:transactions_app/widgets/app_button.dart';
 import 'package:transactions_app/widgets/base_app_bar.dart';
 
 import '../../services/auth_service.dart';
 
+// Add ConfirmTransaction widget
 class ConfirmTransaction extends StatefulWidget {
   final String accountNo;
   final String? bankName;
-  const ConfirmTransaction({super.key, required this.accountNo, this.bankName});
+
+  const ConfirmTransaction({Key? key, required this.accountNo, this.bankName})
+      : super(key: key);
 
   @override
   State<ConfirmTransaction> createState() => _ConfirmTransactionState();
 }
 
+// Add _ConfirmTransactionState class
 class _ConfirmTransactionState extends State<ConfirmTransaction> {
   Map<String, dynamic>? _userData;
   Map<String, dynamic>? _currentUserData;
@@ -21,9 +27,8 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
   String amount = '';
   final _transferController = TextEditingController();
   bool _isSufficient = false;
-
-  // checkbox
   bool isChecked = false;
+  late String _qrData;
 
   @override
   void initState() {
@@ -56,15 +61,21 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
     });
   }
 
+  String _generateQRData(
+      String accountNo, String userId, String password, String amount) {
+    return '$accountNo,$userId,$password,$amount';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: BaseAppBar(title: Strings.confirm, canPop: true),
-      body: _userData == null
+      body: _userData == null || _currentUserData == null
           ? Center(
               child: CircularProgressIndicator(
-              color: AppColors.baseColor,
-            ))
+                color: AppColors.baseColor,
+              ),
+            )
           : Padding(
               padding: EdgeInsets.only(
                   right: Sizes.size16, left: Sizes.size16, top: Sizes.size24),
@@ -78,26 +89,22 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                              padding: EdgeInsets.only(bottom: Sizes.size8),
-                              child: Text(
-                                _userData!['username'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          widget.bankName != null
-                              ? Text(
-                                  "${widget.bankName} - ${_userData!['account_no']}",
-                                  style: const TextStyle(color: Colors.black54),
-                                )
-                              : Text(
-                                  "Dragonfly Bank - ${_userData!['account_no']}",
-                                  style: const TextStyle(color: Colors.black54),
-                                ),
+                            padding: EdgeInsets.only(bottom: Sizes.size8),
+                            child: Text(
+                              _userData!['username'] ?? '',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Text(
+                            "${widget.bankName ?? 'Dragonfly Bank'} - ${_userData!['account_no']}",
+                            style: const TextStyle(color: Colors.black54),
+                          ),
                         ],
                       ),
                     ],
                   ),
-                  Wallet(currentUserData: _currentUserData),
+                  Wallet(currentUserData: _currentUserData!),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -138,8 +145,20 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                       });
                     },
                   ),
-                  const Spacer(),
-                  Image.asset(ImagePaths.securePayment),
+                  SizedBox(height: Sizes.size16),
+                  _isSufficient
+                      ? QrImageView(
+                          data: _generateQRData(
+                            _userData!['account_no'],
+                            _currentUserData!['id'],
+                            'password', // Replace 'password' with the actual password
+                            amount,
+                          ),
+                          version: QrVersions.auto,
+                          size: 200.0,
+                        )
+                      : Container(),
+                  Spacer(),
                   Padding(
                     padding: EdgeInsets.only(
                         bottom: Sizes.size40, top: Sizes.size32),
@@ -149,13 +168,13 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                       onTap: () {
                         if (_isSufficient == true) {
                           AuthService().updateBalance(
-                              senderUserId: _currentUserData!['id'],
-                              receiverUserId: _userData!['id'],
-                              amount: amount);
-                          isChecked.toString() == 'true'
-                              ? AuthService()
-                                  .addToQuickTransfer(_userData!['id'])
-                              : null;
+                            senderUserId: _currentUserData!['id'],
+                            receiverUserId: _userData!['id'],
+                            amount: amount,
+                          );
+                          if (isChecked) {
+                            AuthService().addToQuickTransfer(_userData!['id']);
+                          }
 
                           AuthService()
                               .updateHistory('out', _userData!['id'], amount);
@@ -196,7 +215,7 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                         }
                       },
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -204,12 +223,15 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
   }
 }
 
+// You can keep the ReceiverUser and Wallet widgets as they are.
+
 class ReceiverUser extends StatelessWidget {
   const ReceiverUser({
-    super.key,
+    Key? key,
     required Map<String, dynamic>? userData,
     String? bankName,
-  }) : _userData = userData;
+  })  : _userData = userData,
+        super(key: key);
 
   final Map<String, dynamic>? _userData;
 
@@ -223,11 +245,12 @@ class ReceiverUser extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-                padding: EdgeInsets.only(bottom: Sizes.size8),
-                child: Text(
-                  _userData!['username'],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                )),
+              padding: EdgeInsets.only(bottom: Sizes.size8),
+              child: Text(
+                _userData!['username'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
             Text(
               " - ${_userData!['account_no']}",
               style: const TextStyle(color: Colors.black54),
@@ -241,9 +264,10 @@ class ReceiverUser extends StatelessWidget {
 
 class Wallet extends StatelessWidget {
   const Wallet({
-    super.key,
+    Key? key,
     required Map<String, dynamic>? currentUserData,
-  }) : _currentUserData = currentUserData;
+  })  : _currentUserData = currentUserData,
+        super(key: key);
 
   final Map<String, dynamic>? _currentUserData;
 
@@ -254,44 +278,44 @@ class Wallet extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Sizes.size12),
-            border: Border.all(
-              color: AppColors.baseColor,
-            )),
+          borderRadius: BorderRadius.circular(Sizes.size12),
+          border: Border.all(
+            color: AppColors.baseColor,
+          ),
+        ),
         child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: Sizes.size20, vertical: Sizes.size16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      Strings.mainWallet,
-                      style: TextStyle(
-                          fontSize: Sizes.size10, color: Colors.black54),
-                    ),
-                    SizedBox(
-                      height: Sizes.size10,
-                    ),
-                    Text(
-                      '\$ ${_currentUserData!['total_balance']}',
-                      style: TextStyle(
-                          fontSize: Sizes.size16, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      color: AppColors.baseColor,
-                    )
-                  ],
-                )
-              ],
-            )),
+          padding: EdgeInsets.symmetric(
+              horizontal: Sizes.size20, vertical: Sizes.size16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    Strings.mainWallet,
+                    style: TextStyle(
+                        fontSize: Sizes.size10, color: Colors.black54),
+                  ),
+                  SizedBox(height: Sizes.size10),
+                  Text(
+                    '\$ ${_currentUserData!['total_balance']}',
+                    style: TextStyle(
+                        fontSize: Sizes.size16, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    color: AppColors.baseColor,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

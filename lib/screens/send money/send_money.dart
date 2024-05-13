@@ -168,9 +168,21 @@ class DFlyUsersArea extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: Sizes.size32),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const CompanyBankMoneyTransfer(),
-        )),
+        onTap: () async {
+          // Create GlobalKey
+          final GlobalKey<State<CompanyBankMoneyTransfer>> key =
+              GlobalKey<State<CompanyBankMoneyTransfer>>();
+          // Navigate to CompanyBankMoneyTransfer screen and pass the key
+          final result = await Navigator.of(context).push<String>(
+            MaterialPageRoute(
+              builder: (context) => CompanyBankMoneyTransfer(key: key),
+            ),
+          );
+          // Handle result if needed
+          if (result != null) {
+            // Handle result here if needed
+          }
+        },
         child: Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Sizes.size12),
