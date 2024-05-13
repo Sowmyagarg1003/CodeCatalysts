@@ -126,3 +126,23 @@ class _CompanyBankMoneyTransferState extends State<CompanyBankMoneyTransfer> {
     );
   }
 }
+
+
+// AlertDialog(
+//                             backgroundColor = Colors.white,
+//                             title = const Text(
+//                               'Invalid Account',
+//                               textAlign: TextAlign.center,
+//                             ),
+//                             actions = [
+//                               TextButton(
+//                                 onPressed: () {
+//                                   Navigator.pop(context);
+//                                 },
+//                                 child: Text(
+//                                   'OK',
+//                                   style: TextStyle(color: AppColors.baseColor),
+//                                 ),
+//                               ),
+//                             ],
+//                           )
