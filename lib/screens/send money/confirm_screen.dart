@@ -1,13 +1,9 @@
-// Import necessary packages
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:transactions_app/utils/constants.dart';
-import 'package:transactions_app/widgets/app_button.dart';
-import 'package:transactions_app/widgets/base_app_bar.dart';
 
 import '../../services/auth_service.dart';
 
-// Add ConfirmTransaction widget
 class ConfirmTransaction extends StatefulWidget {
   final String accountNo;
   final String? bankName;
@@ -19,7 +15,6 @@ class ConfirmTransaction extends StatefulWidget {
   State<ConfirmTransaction> createState() => _ConfirmTransactionState();
 }
 
-// Add _ConfirmTransactionState class
 class _ConfirmTransactionState extends State<ConfirmTransaction> {
   Map<String, dynamic>? _userData;
   Map<String, dynamic>? _currentUserData;
@@ -28,7 +23,6 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
   final _transferController = TextEditingController();
   bool _isSufficient = false;
   bool isChecked = false;
-  late String _qrData;
 
   @override
   void initState() {
@@ -63,13 +57,16 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
 
   String _generateQRData(
       String accountNo, String userId, String password, String amount) {
+    // Include account number, user ID, password, and amount in the QR data
     return '$accountNo,$userId,$password,$amount';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: BaseAppBar(title: Strings.confirm, canPop: true),
+      appBar: AppBar(
+        title: Text(Strings.confirm),
+      ),
       body: _userData == null || _currentUserData == null
           ? Center(
               child: CircularProgressIndicator(
@@ -108,7 +105,7 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      Strings.totalTranfer,
+                      'Total Transfer',
                       style: TextStyle(
                           fontSize: Sizes.size16, color: Colors.black87),
                     ),
@@ -159,71 +156,12 @@ class _ConfirmTransactionState extends State<ConfirmTransaction> {
                         )
                       : Container(),
                   Spacer(),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        bottom: Sizes.size40, top: Sizes.size32),
-                    child: AppButton(
-                      title: Strings.transferNow,
-                      isValid: true,
-                      onTap: () {
-                        if (_isSufficient == true) {
-                          AuthService().updateBalance(
-                            senderUserId: _currentUserData!['id'],
-                            receiverUserId: _userData!['id'],
-                            amount: amount,
-                          );
-                          if (isChecked) {
-                            AuthService().addToQuickTransfer(_userData!['id']);
-                          }
-
-                          AuthService()
-                              .updateHistory('out', _userData!['id'], amount);
-                          Navigator.of(context).pushNamed('/success-send-money',
-                              arguments: amount);
-                        } else {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return SizedBox(
-                                height: Sizes.size255,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.warning,
-                                            color: Colors.amber,
-                                            size: Sizes.size40,
-                                          ),
-                                          Text(
-                                            'Insufficient Balance!',
-                                            style: TextStyle(
-                                                fontSize: Sizes.size24),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
                 ],
               ),
             ),
     );
   }
 }
-
-// You can keep the ReceiverUser and Wallet widgets as they are.
 
 class ReceiverUser extends StatelessWidget {
   const ReceiverUser({
